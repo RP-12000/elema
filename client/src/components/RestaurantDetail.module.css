@@ -1,0 +1,120 @@
+.container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--bg-2);
+  min-height: 100%;
+}
+
+.back {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  width: fit-content;
+  font-family: inherit;
+}
+
+.back:hover { opacity: 0.8; }
+
+.header { display: flex; flex-direction: column; gap: 8px; }
+
+.name {
+  font-size: var(--fs-4xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.badge {
+  padding: 4px 10px;
+  background: var(--bg-4);
+  border-radius: 12px;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.open   { background: var(--green-bg); color: var(--green); }
+.closed { background: var(--red-bg);   color: var(--red); }
+
+.navBtn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.navBtn:hover { background: var(--accent-hover); }
+
+.details {
+  background: var(--bg-3);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+
+.hours {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.link {
+  color: var(--blue);
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 4px;
+  font-size: var(--fs-md);
+}
+
+.review {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.review:last-child { border-bottom: none; }
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+  color: var(--text-primary);
+}
+
+.reviewTime { font-size: var(--fs-xs); color: var(--text-muted); }
+
+.reviewText {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 20px;
+  font-size: var(--fs-md);
+}
+
+.error {
+  color: var(--red);
+  font-size: var(--fs-md);
+}
