@@ -28,20 +28,19 @@ export default function RestaurantCard({ restaurant, userLocation, onClick, alle
         <div className={styles.meta}>
           {rating != null && (
             <span className={styles.rating}>
-              ⭐ {rating.toFixed(1)}
+              {rating.toFixed(1)} stars
               {userRatingsTotal && <span className={styles.ratingCount}> ({userRatingsTotal})</span>}
             </span>
           )}
           <span className={styles.price}>{price}</span>
           {cuisine && <span className={styles.cuisine}>{cuisine}</span>}
-          {/* Allergy warning — only renders if allergens are set and risk > none */}
           {allergens?.length > 0 && (
             <AllergyWarning cuisineTypes={types} allergens={allergens} />
           )}
         </div>
 
         <div className={styles.footer}>
-          <span className={styles.address}>📍 {vicinity}</span>
+          <span className={styles.address}>{vicinity}</span>
           {distance && <span className={styles.distance}>{distance}</span>}
         </div>
       </div>
@@ -52,23 +51,23 @@ export default function RestaurantCard({ restaurant, userLocation, onClick, alle
 
 function getCuisine(types = []) {
   const map = {
-    japanese_restaurant:  '🍣 Japanese',
-    chinese_restaurant:   '🥢 Chinese',
-    italian_restaurant:   '🍝 Italian',
-    mexican_restaurant:   '🌮 Mexican',
-    indian_restaurant:    '🍛 Indian',
-    thai_restaurant:      '🍜 Thai',
-    american_restaurant:  '🍔 American',
-    pizza_restaurant:     '🍕 Pizza',
-    seafood_restaurant:   '🦞 Seafood',
-    vegetarian_restaurant:'🥗 Vegetarian',
-    fast_food_restaurant: '🍟 Fast Food',
-    cafe:                 '☕ Café',
-    bakery:               '🥐 Bakery',
-    bar:                  '🍺 Bar',
+    japanese_restaurant:   'Japanese',
+    chinese_restaurant:    'Chinese',
+    italian_restaurant:    'Italian',
+    mexican_restaurant:    'Mexican',
+    indian_restaurant:     'Indian',
+    thai_restaurant:       'Thai',
+    american_restaurant:   'American',
+    pizza_restaurant:      'Pizza',
+    seafood_restaurant:    'Seafood',
+    vegetarian_restaurant: 'Vegetarian',
+    fast_food_restaurant:  'Fast Food',
+    cafe:                  'Cafe',
+    bakery:                'Bakery',
+    bar:                   'Bar',
   };
   for (const t of types) { if (map[t]) return map[t]; }
-  return '🍽️ Restaurant';
+  return 'Restaurant';
 }
 
 function getDistance(from, to) {

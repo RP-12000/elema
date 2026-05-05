@@ -7,6 +7,22 @@ const COMMON_ALLERGENS = [
   'Soy', 'Fish', 'Shellfish', 'Sesame',
 ];
 
+const COLORBLIND_MODES = [
+  { value: 'none',         label: 'Off' },
+  { value: 'deuteranopia', label: 'Deuteranopia' },
+  { value: 'protanopia',   label: 'Protanopia' },
+  { value: 'tritanopia',   label: 'Tritanopia' },
+  { value: 'achromatopsia',label: 'Greyscale' },
+];
+
+const COLORBLIND_FILTERS = {
+  none:          '',
+  deuteranopia:  'url(#cb-deuteranopia)',
+  protanopia:    'url(#cb-protanopia)',
+  tritanopia:    'url(#cb-tritanopia)',
+  achromatopsia: 'grayscale(1)',
+};
+
 export default function AccessibilityPanel({
   onHighContrast, highContrast,
   onBlindAssistChange, navState,
@@ -17,6 +33,7 @@ export default function AccessibilityPanel({
   const [fontScale, setFontScale]     = useState('normal');
   const [showOverlay, setShowOverlay] = useState(false);
   const [allergyInput, setAllergyInput] = useState('');
+  const [colorblindMode, setColorblindMode] = useState('none');
   const panelRef  = useRef(null);
   const inputRef  = useRef(null);
 
@@ -37,6 +54,13 @@ export default function AccessibilityPanel({
     if (open) document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
+
+  // Apply colorblind filter to the whole page
+  useEffect(() => {
+    const filter = COLORBLIND_FILTERS[colorblindMode] || '';
+    document.documentElement.style.filter = filter;
+    return () => { document.documentElement.style.filter = ''; };
+  }, [colorblindMode]);
 
   const toggleBlindAssist = () => {
     if (!isNavigating) return;
@@ -75,6 +99,36 @@ export default function AccessibilityPanel({
 
   return (
     <>
+      {/* SVG filters for colorblind modes */}
+      <svg style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
+        <defs>
+          {/* Deuteranopia (red-green, missing green) */}
+          <filter id="cb-deuteranopia">
+            <feColorMatrix type="matrix" values="
+              0.625 0.375 0     0 0
+              0.7   0.3   0     0 0
+              0     0.3   0.7   0 0
+              0     0     0     1 0" />
+          </filter>
+          {/* Protanopia (red-green, missing red) */}
+          <filter id="cb-protanopia">
+            <feColorMatrix type="matrix" values="
+              0.567 0.433 0     0 0
+              0.558 0.442 0     0 0
+              0     0.242 0.758 0 0
+              0     0     0     1 0" />
+          </filter>
+          {/* Tritanopia (blue-yellow) */}
+          <filter id="cb-tritanopia">
+            <feColorMatrix type="matrix" values="
+              0.95  0.05  0     0 0
+              0     0.433 0.567 0 0
+              0     0.475 0.525 0 0
+              0     0     0     1 0" />
+          </filter>
+        </defs>
+      </svg>
+
       <div className={styles.wrapper} ref={panelRef}>
         {/* Trigger */}
         <button
@@ -98,7 +152,6 @@ export default function AccessibilityPanel({
             {/* ── Blind Assist ── */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <span className={styles.sectionIcon}>👁️</span>
                 <div>
                   <p className={styles.sectionLabel}>Blind Assist</p>
                   <p className={styles.sectionDesc}>
@@ -115,14 +168,13 @@ export default function AccessibilityPanel({
                 </button>
               </div>
               {!isNavigating && (
-                <p className={styles.disabledHint}>🧭 Navigate to a restaurant to use</p>
+                <p className={styles.disabledHint}>Navigate to a restaurant to use</p>
               )}
             </div>
 
             {/* ── Allergies ── */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <span className={styles.sectionIcon}>🚨</span>
                 <div>
                   <p className={styles.sectionLabel}>Allergies</p>
                   <p className={styles.sectionDesc}>Warn me on restaurant cards</p>
@@ -154,7 +206,7 @@ export default function AccessibilityPanel({
                   className={styles.allergenInput}
                   value={allergyInput}
                   onChange={(e) => setAllergyInput(e.target.value)}
-                  placeholder="Add custom allergen…"
+                  placeholder="Add custom allergen..."
                   aria-label="Add custom allergen"
                 />
                 <button
@@ -177,7 +229,7 @@ export default function AccessibilityPanel({
                         className={styles.allergenRemove}
                         onClick={() => onRemoveAllergen(a)}
                         aria-label={`Remove ${a}`}
-                      >×</button>
+                      >x</button>
                     </span>
                   ))}
                 </div>
@@ -187,7 +239,6 @@ export default function AccessibilityPanel({
             {/* ── High Contrast ── */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <span className={styles.sectionIcon}>🌗</span>
                 <div>
                   <p className={styles.sectionLabel}>High Contrast</p>
                   <p className={styles.sectionDesc}>Increase color contrast</p>
@@ -202,10 +253,31 @@ export default function AccessibilityPanel({
               </div>
             </div>
 
+            {/* ── Colorblind Mode ── */}
+            <div className={styles.section}>
+              <div className={styles.sectionHeader}>
+                <div>
+                  <p className={styles.sectionLabel}>Colorblind Mode</p>
+                  <p className={styles.sectionDesc}>Adjust colors for color vision deficiency</p>
+                </div>
+              </div>
+              <div className={styles.colorblindButtons}>
+                {COLORBLIND_MODES.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    className={`${styles.colorblindBtn} ${colorblindMode === value ? styles.colorblindBtnActive : ''}`}
+                    onClick={() => setColorblindMode(value)}
+                    aria-pressed={colorblindMode === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* ── Text Size ── */}
             <div className={styles.section}>
               <div className={styles.sectionHeader}>
-                <span className={styles.sectionIcon}>🔤</span>
                 <div><p className={styles.sectionLabel}>Text Size</p></div>
               </div>
               <div className={styles.fontButtons}>
@@ -231,8 +303,8 @@ export default function AccessibilityPanel({
       {showOverlay && (
         <div className={styles.blindOverlay} role="dialog" aria-label="Blind assist active">
           <div className={styles.blindOverlayHeader}>
-            <span>👁️ Blind Assist</span>
-            <button className={styles.blindCloseBtn} onClick={closeOverlay} aria-label="Close blind assist">✕</button>
+            <span>Blind Assist</span>
+            <button className={styles.blindCloseBtn} onClick={closeOverlay} aria-label="Close blind assist">x</button>
           </div>
           <div className={styles.blindOverlayContent}>
             <BlindAssist navState={navState} />

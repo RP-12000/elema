@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import axios from 'axios';
 import Navigation from './Navigation';
@@ -19,22 +19,20 @@ export default function Map({
   const markersRef      = useRef([]);
   const userMarkerRef   = useRef(null);
 
-  const [error, setError]           = useState(null);
-  const [radius, setRadius]         = useState(1500);
-  const [mapReady, setMapReady]     = useState(false);
+  const [error, setError]               = useState(null);
+  const [radius, setRadius]             = useState(1500);
+  const [mapReady, setMapReady]         = useState(false);
   const [highContrast, setHighContrast] = useState(false);
-  const [navState, setNavState]     = useState(null);
+  const [navState, setNavState]         = useState(null);
   const [blindAssistOn, setBlindAssistOn] = useState(false);
+  const [navTarget, setNavTarget]       = useState(null);
 
-  // Internal nav state (can be set from map marker click too)
-  const [navTarget, setNavTarget]   = useState(null);
-
-  // Sync external navigationTarget prop → internal state
+  // Sync external navigationTarget prop to internal state
   useEffect(() => {
     if (navigationTarget) setNavTarget(navigationTarget);
   }, [navigationTarget]);
 
-  // ── Init map ──────────────────────────────────────────────
+  // Init Google Map
   useEffect(() => {
     const loader = new Loader({
       apiKey: GOOGLE_MAPS_KEY,
@@ -56,7 +54,6 @@ export default function Map({
       });
       setMapReady(true);
 
-      // Auto-locate
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
@@ -93,7 +90,7 @@ export default function Map({
     });
   };
 
-  // ── Restaurant markers ────────────────────────────────────
+  // Restaurant markers
   useEffect(() => {
     if (!mapInstanceRef.current || !window.google) return;
     markersRef.current.forEach((m) => m.setMap(null));
@@ -110,16 +107,19 @@ export default function Map({
         },
       });
 
+      const priceStr = getPriceLabel(r.priceLevel);
+      const statusStr = r.openNow ? 'Open now' : 'Closed';
+
       const infoWindow = new window.google.maps.InfoWindow({
         content: `
           <div style="max-width:200px;font-family:sans-serif">
             <strong style="font-size:14px">${r.name}</strong><br/>
-            ⭐ ${r.rating ?? 'N/A'} · ${getPriceLabel(r.priceLevel)}<br/>
-            ${r.openNow ? '🟢 Open now' : '🔴 Closed'}<br/>
+            ${r.rating ?? 'N/A'} stars &middot; ${priceStr}<br/>
+            ${statusStr}<br/>
             <button
               onclick="window.__navigateTo('${r.id}','${r.name.replace(/'/g, "\\'")}',${r.location.lat},${r.location.lng})"
               style="margin-top:8px;padding:5px 12px;background:#ff6b35;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600"
-            >🧭 Navigate</button>
+            >Navigate</button>
           </div>
         `,
       });
@@ -132,13 +132,11 @@ export default function Map({
       markersRef.current.push(marker);
     });
 
-    // Global callback for the Navigate button inside InfoWindow HTML
     window.__navigateTo = (id, name, lat, lng) => {
       setNavTarget({ location: { lat: parseFloat(lat), lng: parseFloat(lng) }, name });
     };
   }, [restaurants, onSelectRestaurant]);
 
-  // ── Search nearby ─────────────────────────────────────────
   const searchNearby = () => {
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser.');
@@ -184,7 +182,6 @@ export default function Map({
 
   return (
     <div className={`${styles.container} ${desktopMode ? styles.containerDesktop : ''} ${highContrast ? styles.highContrast : ''}`}>
-      {/* Search bar */}
       <div className={styles.controls}>
         <select
           className={styles.radiusSelect}
@@ -204,19 +201,17 @@ export default function Map({
           disabled={loading}
           aria-label="Search for nearby restaurants"
         >
-          {loading ? '⏳ Searching...' : '📍 Find Nearby Restaurants'}
+          {loading ? 'Searching...' : 'Find Nearby Restaurants'}
         </button>
       </div>
 
       {error && (
-        <div className={styles.error} role="alert">⚠️ {error}</div>
+        <div className={styles.error} role="alert">{error}</div>
       )}
 
-      {/* Map */}
       <div className={styles.mapWrapper}>
         <div ref={mapRef} className={styles.map} aria-label="Google Map" />
 
-        {/* Accessibility button — top-right corner of map */}
         <div className={styles.accessibilityBtn}>
           <AccessibilityPanel
             highContrast={highContrast}
@@ -229,7 +224,6 @@ export default function Map({
           />
         </div>
 
-        {/* Navigation panel — hidden while Blind Assist overlay is open */}
         {navTarget && mapReady && !blindAssistOn && (
           <div className={styles.navPanel}>
             <Navigation
@@ -249,5 +243,6 @@ export default function Map({
 
 function getPriceLabel(level) {
   if (level == null) return 'Price N/A';
-  return ['Free', '$', '$$', '$$$', '$$$$'][level] ?? 'N/A';
+  const labels = ['Free', '$', '$$', '$$$', '$$$$'];
+  return labels[level] ?? 'N/A';
 }

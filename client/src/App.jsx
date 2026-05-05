@@ -76,11 +76,11 @@ export default function App() {
       <div className={styles.desktop}>
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
-            <h1 className={styles.logo}>🍽️ Restaurant Finder</h1>
+            <h1 className={styles.logo}>Restaurant Finder</h1>
           </div>
           <nav className={styles.sidebarNav}>
             <button className={`${styles.navItem} ${styles.navActive}`}>
-              <span className={styles.navIcon}>🍴</span>
+              <span className={styles.navIcon}></span>
               <span>Restaurants</span>
               {restaurants.length > 0 && <span className={styles.badge}>{restaurants.length}</span>}
             </button>
@@ -95,7 +95,7 @@ export default function App() {
       {/* ── Mobile ── */}
       <div className={styles.mobile}>
         <header className={styles.mobileHeader}>
-          <h1 className={styles.mobileTitle}>🍽️ Restaurant Finder</h1>
+          <h1 className={styles.mobileTitle}>Restaurant Finder</h1>
         </header>
         <nav className={styles.mobileTabs} role="tablist">
           <button
@@ -103,13 +103,13 @@ export default function App() {
             aria-selected={mobileTab === 'map'}
             className={`${styles.mobileTab} ${mobileTab === 'map' ? styles.mobileTabActive : ''}`}
             onClick={() => setMobileTab('map')}
-          >🗺️ Map</button>
+          >Map</button>
           <button
             role="tab"
             aria-selected={mobileTab === 'list'}
             className={`${styles.mobileTab} ${mobileTab === 'list' ? styles.mobileTabActive : ''}`}
             onClick={() => setMobileTab('list')}
-          >🍴 {restaurants.length > 0 ? `(${restaurants.length})` : 'List'}</button>
+          >{restaurants.length > 0 ? `Restaurants (${restaurants.length})` : 'Restaurants'}</button>
         </nav>
         <main className={styles.mobileMain}>
           <div style={{ display: mobileTab === 'map' ? 'flex' : 'none', flex: 1, flexDirection: 'column' }}>

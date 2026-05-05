@@ -11,7 +11,6 @@ function cacheKey(types, allergens) {
 
 export default function AllergyWarning({ cuisineTypes = [], allergens = [] }) {
   const [result, setResult] = useState(null);
-  const [open, setOpen]     = useState(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
@@ -31,7 +30,6 @@ export default function AllergyWarning({ cuisineTypes = [], allergens = [] }) {
       return;
     }
 
-    // Debounce slightly so rapid re-renders don't spam the API
     const timer = setTimeout(async () => {
       try {
         const { data } = await axios.post('/api/allergy/check', {
@@ -41,7 +39,7 @@ export default function AllergyWarning({ cuisineTypes = [], allergens = [] }) {
         cache.set(key, data);
         if (mountedRef.current) setResult(data);
       } catch {
-        // silently fail — don't block the UI
+        // silently fail
       }
     }, 300);
 
@@ -53,37 +51,19 @@ export default function AllergyWarning({ cuisineTypes = [], allergens = [] }) {
   const isHigh = result.risk === 'high';
 
   return (
-    <div className={styles.wrapper}>
-      <button
-        className={`${styles.badge} ${isHigh ? styles.badgeHigh : styles.badgeLow}`}
-        onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
-        aria-label={`Allergy warning: ${result.warnings.join('. ')}`}
-        aria-expanded={open}
-      >
-        {isHigh ? '⚠️' : '⚡'} Allergy
-      </button>
-
-      {open && (
-        <div
-          className={styles.tooltip}
-          role="tooltip"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <p className={styles.tooltipTitle}>
-            {isHigh ? '⚠️ High Risk' : '⚡ Possible Risk'}
-          </p>
-          <ul className={styles.tooltipList}>
-            {result.warnings.map((w, i) => (
-              <li key={i}>{w}</li>
-            ))}
-          </ul>
-          <button
-            className={styles.tooltipClose}
-            onClick={(e) => { e.stopPropagation(); setOpen(false); }}
-          >
-            Dismiss
-          </button>
-        </div>
+    <div
+      className={`${styles.wrapper} ${isHigh ? styles.wrapperHigh : styles.wrapperLow}`}
+      aria-label={`Allergy warning: ${result.warnings.join('. ')}`}
+    >
+      <span className={`${styles.badge} ${isHigh ? styles.badgeHigh : styles.badgeLow}`}>
+        {isHigh ? 'High Allergy Risk' : 'Possible Allergy Risk'}
+      </span>
+      {result.warnings.length > 0 && (
+        <ul className={styles.warningList}>
+          {result.warnings.map((w, i) => (
+            <li key={i}>{w}</li>
+          ))}
+        </ul>
       )}
     </div>
   );

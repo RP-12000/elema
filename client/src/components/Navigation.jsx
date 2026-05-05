@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from './Navigation.module.css';
 
 const TRAVEL_MODES = [
-  { value: 'WALKING',   label: '🚶 Walk' },
-  { value: 'DRIVING',   label: '🚗 Drive' },
-  { value: 'TRANSIT',   label: '🚌 Transit' },
-  { value: 'BICYCLING', label: '🚲 Bike' },
+  { value: 'WALKING',   label: 'Walk' },
+  { value: 'DRIVING',   label: 'Drive' },
+  { value: 'TRANSIT',   label: 'Transit' },
+  { value: 'BICYCLING', label: 'Bike' },
 ];
 
 export default function Navigation({ map, userLocation, destination, destinationName, onClose, onNavStateChange }) {
@@ -142,9 +142,9 @@ export default function Navigation({ map, userLocation, destination, destination
       {/* Summary */}
       {summary && (
         <div className={styles.summary}>
-          <span className={styles.summaryItem}>📏 {summary.distance}</span>
+          <span className={styles.summaryItem}>{summary.distance}</span>
           <span className={styles.summaryDivider}>·</span>
-          <span className={styles.summaryItem}>⏱ {summary.duration}</span>
+          <span className={styles.summaryItem}>{summary.duration}</span>
         </div>
       )}
 
@@ -161,7 +161,7 @@ export default function Navigation({ map, userLocation, destination, destination
               onClick={() => speakStep(steps[currentStep]?.instruction)}
               aria-label="Read current step aloud"
             >
-              🔊
+              Read aloud
             </button>
           </div>
 
@@ -184,7 +184,7 @@ export default function Navigation({ map, userLocation, destination, destination
               </li>
             ))}
             <li className={styles.stepDestination}>
-              <span className={styles.stepIcon}>🏁</span>
+              <span className={styles.stepIcon}>[ ]</span>
               <span className={styles.stepText}>Arrive at {destinationName}</span>
             </li>
           </ul>

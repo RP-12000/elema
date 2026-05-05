@@ -1,25 +1,20 @@
 .wrapper {
-  position: relative;
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
 }
 
-/* ── Badge ── */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
   padding: 2px 8px;
   border-radius: 10px;
   font-size: var(--fs-xs);
   font-weight: 700;
-  border: none;
-  cursor: pointer;
   white-space: nowrap;
-  font-family: inherit;
-  transition: opacity 0.15s;
+  width: fit-content;
 }
-
-.badge:hover { opacity: 0.85; }
 
 .badgeHigh {
   background: rgba(248,113,113,0.18);
@@ -31,65 +26,24 @@
   color: #fbbf24;
 }
 
-/* ── Tooltip ── */
-.tooltip {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0;
-  min-width: 200px;
-  max-width: 260px;
-  background: var(--bg-2);
-  border: 1px solid var(--border-strong);
-  border-radius: 10px;
-  padding: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-  z-index: 500;
-  animation: fadeUp 0.15s ease;
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.tooltipTitle {
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.tooltipList {
+.warningList {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 2px;
+  padding-left: 4px;
 }
 
-.tooltipList li {
+.warningList li {
   font-size: var(--fs-xs);
   color: var(--text-secondary);
   padding-left: 10px;
   position: relative;
 }
 
-.tooltipList li::before {
+.warningList li::before {
   content: '•';
   position: absolute;
   left: 0;
   color: var(--text-muted);
 }
-
-.tooltipClose {
-  font-size: var(--fs-xs);
-  color: var(--text-muted);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  font-family: inherit;
-  text-decoration: underline;
-}
-
-.tooltipClose:hover { color: var(--text-secondary); }

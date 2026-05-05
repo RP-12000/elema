@@ -3,25 +3,25 @@ import RestaurantCard from './RestaurantCard';
 import styles from './RestaurantList.module.css';
 
 const SORT_OPTIONS = [
-  { value: 'rating',     label: '⭐ Rating',       icon: '⭐' },
-  { value: 'distance',   label: '📍 Distance',     icon: '📍' },
-  { value: 'price_asc',  label: '💰 Price: Low→High', icon: '💰' },
-  { value: 'price_desc', label: '💰 Price: High→Low', icon: '💰' },
+  { value: 'rating',     label: 'Rating' },
+  { value: 'distance',   label: 'Distance' },
+  { value: 'price_asc',  label: 'Price: Low to High' },
+  { value: 'price_desc', label: 'Price: High to Low' },
 ];
 
 const CUISINE_TAGS = [
-  { value: 'sushi',       label: '🍣 Sushi',      keywords: ['sushi', 'japanese'] },
-  { value: 'bbq',         label: '🥩 BBQ',        keywords: ['bbq', 'barbecue', 'korean', 'grill'] },
-  { value: 'chinese',     label: '🥢 Chinese',    keywords: ['chinese'] },
-  { value: 'italian',     label: '🍝 Italian',    keywords: ['italian', 'pizza'] },
-  { value: 'mexican',     label: '🌮 Mexican',    keywords: ['mexican'] },
-  { value: 'indian',      label: '🍛 Indian',     keywords: ['indian'] },
-  { value: 'thai',        label: '🍜 Thai',       keywords: ['thai'] },
-  { value: 'burger',      label: '🍔 Burger',     keywords: ['burger', 'american', 'fast_food'] },
-  { value: 'seafood',     label: '🦞 Seafood',    keywords: ['seafood'] },
-  { value: 'cafe',        label: '☕ Café',        keywords: ['cafe', 'coffee', 'bakery'] },
-  { value: 'vegetarian',  label: '🥗 Vegetarian', keywords: ['vegetarian', 'vegan'] },
-  { value: 'ramen',       label: '🍜 Ramen',      keywords: ['ramen', 'noodle'] },
+  { value: 'sushi',       label: 'Sushi',      keywords: ['sushi', 'japanese'] },
+  { value: 'bbq',         label: 'BBQ',        keywords: ['bbq', 'barbecue', 'korean', 'grill'] },
+  { value: 'chinese',     label: 'Chinese',    keywords: ['chinese'] },
+  { value: 'italian',     label: 'Italian',    keywords: ['italian', 'pizza'] },
+  { value: 'mexican',     label: 'Mexican',    keywords: ['mexican'] },
+  { value: 'indian',      label: 'Indian',     keywords: ['indian'] },
+  { value: 'thai',        label: 'Thai',       keywords: ['thai'] },
+  { value: 'burger',      label: 'Burger',     keywords: ['burger', 'american', 'fast_food'] },
+  { value: 'seafood',     label: 'Seafood',    keywords: ['seafood'] },
+  { value: 'cafe',        label: 'Cafe',       keywords: ['cafe', 'coffee', 'bakery'] },
+  { value: 'vegetarian',  label: 'Vegetarian', keywords: ['vegetarian', 'vegan'] },
+  { value: 'ramen',       label: 'Ramen',      keywords: ['ramen', 'noodle'] },
 ];
 
 export default function RestaurantList({ restaurants, userLocation, onSelect, onSearchMap, allergens }) {
@@ -89,8 +89,8 @@ export default function RestaurantList({ restaurants, userLocation, onSelect, on
   if (restaurants.length === 0) {
     return (
       <div className={styles.empty}>
-        <p className={styles.emptyIcon}>🍽️</p>
-        <p>No restaurants found yet.</p>
+        <p className={styles.emptyIcon}>No restaurants found yet.</p>
+        <p>Search the map to find nearby restaurants.</p>
         <button className={styles.goMapBtn} onClick={onSearchMap}>
           Go to Map &amp; Search
         </button>
@@ -126,7 +126,7 @@ export default function RestaurantList({ restaurants, userLocation, onSelect, on
             aria-expanded={showFilters}
             aria-label="Toggle filters"
           >
-            🎛 Filters
+            Filters
             {activeFilterCount > 0 && (
               <span className={styles.filterBadge}>{activeFilterCount}</span>
             )}
@@ -144,14 +144,14 @@ export default function RestaurantList({ restaurants, userLocation, onSelect, on
               onClick={() => setFilterOpen(!filterOpen)}
               aria-pressed={filterOpen}
             >
-              🟢 Open Now
+              Open Now
             </button>
             <button
               className={`${styles.chip} ${filterParking ? styles.chipActive : ''}`}
               onClick={() => setFilterParking(!filterParking)}
               aria-pressed={filterParking}
             >
-              🅿️ Parking
+              Parking
             </button>
           </div>
 
@@ -172,7 +172,7 @@ export default function RestaurantList({ restaurants, userLocation, onSelect, on
 
           {activeFilterCount > 0 && (
             <button className={styles.clearBtn} onClick={clearAll}>
-              ✕ Clear all filters
+              Clear all filters
             </button>
           )}
         </div>
