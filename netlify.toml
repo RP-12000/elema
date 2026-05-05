@@ -3,10 +3,10 @@
   command = "npm run build"
   publish = "dist"
 
-# Proxy /api/* to your backend (set BACKEND_URL in Netlify environment variables)
+# Proxy /api/* to Render backend
 [[redirects]]
   from   = "/api/*"
-  to     = ":BACKEND_URL/api/:splat"
+  to     = "https://elema.onrender.com/api/:splat"
   status = 200
   force  = true
 
