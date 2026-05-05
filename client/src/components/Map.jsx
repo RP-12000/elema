@@ -5,7 +5,7 @@ import Navigation from './Navigation';
 import AccessibilityPanel from './AccessibilityPanel';
 import styles from './Map.module.css';
 
-const GOOGLE_MAPS_KEY = 'AIzaSyDn4_Ty8eOo6p5ZXWPyd8NmCp0b_IXzpoc';
+const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 export default function Map({
   onRestaurantsFound, onSelectRestaurant,
