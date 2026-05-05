@@ -12,8 +12,4 @@ export default defineConfig({
       },
     },
   },
-  // In production, VITE_API_URL is injected by Netlify environment variables
-  define: {
-    __API_URL__: JSON.stringify(process.env.VITE_API_URL || ''),
-  },
 });
