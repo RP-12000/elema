@@ -26,12 +26,13 @@
 .triggerEnabled { background: var(--bg-3); border-color: var(--accent); }
 
 .panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  position: fixed;
+  top: 60px;
+  right: 12px;
   width: 280px;
   max-height: calc(100vh - 80px);
   overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--bg-2);
   border: 1px solid var(--border-strong);
   border-radius: 14px;
@@ -41,7 +42,14 @@
   flex-direction: column;
   gap: 4px;
   animation: fadeIn 0.15s ease;
+  /* custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-4) transparent;
 }
+
+.panel::-webkit-scrollbar { width: 4px; }
+.panel::-webkit-scrollbar-track { background: transparent; }
+.panel::-webkit-scrollbar-thumb { background: var(--bg-4); border-radius: 4px; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-6px); }
