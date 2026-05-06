@@ -76,7 +76,7 @@ export default function App() {
       <div className={styles.desktop}>
         <aside className={styles.sidebar}>
           <div className={styles.sidebarHeader}>
-            <h1 className={styles.logo}>Restaurant Finder</h1>
+            <h1 className={styles.logo}>Elema</h1>
           </div>
           <nav className={styles.sidebarNav}>
             <button className={`${styles.navItem} ${styles.navActive}`}>
@@ -95,7 +95,7 @@ export default function App() {
       {/* ── Mobile ── */}
       <div className={styles.mobile}>
         <header className={styles.mobileHeader}>
-          <h1 className={styles.mobileTitle}>Restaurant Finder</h1>
+          <h1 className={styles.mobileTitle}>Elema</h1>
         </header>
         <nav className={styles.mobileTabs} role="tablist">
           <button
