@@ -3,6 +3,10 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  # Google Maps JS API key is intentionally public (restricted by HTTP referrer in Google Cloud Console)
+  SECRETS_SCAN_OMIT_KEYS = "VITE_GOOGLE_MAPS_API_KEY"
+
 # Proxy /api/* to Render backend
 [[redirects]]
   from   = "/api/*"
