@@ -2,9 +2,12 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import styles from './BlindAssist.module.css';
 
-// Scan intervals
-const INTERVAL_OBSTACLE = 2000;  // obstacle detected → scan every 2s
-const INTERVAL_CLEAR    = 6000;  // path clear → scan every 6s (save API calls)
+// VITE_SCAN_INTERVAL: seconds between each scan (default 3)
+// e.g. VITE_SCAN_INTERVAL=1 → scan every 1 second
+const SCAN_INTERVAL = Math.round((parseFloat(import.meta.env.VITE_SCAN_INTERVAL) || 3) * 1000);
+
+// After 1 consecutive "clear" result, stop repeating "Path is clear"
+const CLEAR_SILENCE_AFTER = 1;
 
 // How close (metres) to a step's end location before auto-advancing
 const STEP_ADVANCE_RADIUS = 25;
@@ -30,18 +33,17 @@ function haversineMetres(a, b) {
 }
 
 export default function BlindAssist({ navState, onStepAdvance }) {
-  const videoRef    = useRef(null);
-  const canvasRef   = useRef(null);
-  const streamRef   = useRef(null);
-  const intervalRef = useRef(null);
-  const lastClearRef = useRef(false); // was last result clear?
+  const videoRef     = useRef(null);
+  const canvasRef    = useRef(null);
+  const streamRef    = useRef(null);
+  const intervalRef  = useRef(null);
+  const clearCountRef = useRef(0); // consecutive clear count
 
   const [isActive, setIsActive]           = useState(false);
   const [result, setResult]               = useState(null);
   const [error, setError]                 = useState(null);
   const [scanning, setScanning]           = useState(false);
   const [speechEnabled, setSpeechEnabled] = useState(true);
-  const [currentInterval, setCurrentInterval] = useState(INTERVAL_CLEAR);
 
   // ── Speech ──────────────────────────────────────────────
   const speak = useCallback((text) => {
@@ -61,7 +63,7 @@ export default function BlindAssist({ navState, onStepAdvance }) {
     canvas.width  = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    const imageData = canvas.toDataURL('image/jpeg', 0.55); // slightly lower quality = smaller payload
+    const imageData = canvas.toDataURL('image/jpeg', 0.55);
 
     setScanning(true);
     try {
@@ -70,23 +72,18 @@ export default function BlindAssist({ navState, onStepAdvance }) {
 
       const isClear = !data.hasObstacle || data.severity === 'none';
 
-      // Only speak when:
-      //  • there IS an obstacle, OR
-      //  • path just became clear after an obstacle (one-time "all clear")
       if (!isClear) {
+        // Obstacle — always speak, reset clear counter
         speak(data.action);
-      } else if (!lastClearRef.current) {
-        // Transition: obstacle → clear → say it once
-        speak('Path is clear.');
+        clearCountRef.current = 0;
+      } else {
+        clearCountRef.current += 1;
+        if (clearCountRef.current <= CLEAR_SILENCE_AFTER) {
+          // Announce "clear" only on the first transition
+          speak('Path is clear.');
+        }
+        // After CLEAR_SILENCE_AFTER consecutive clears: stay silent
       }
-      // If was already clear last scan, stay silent
-
-      lastClearRef.current = isClear;
-
-      // Adjust next interval based on result
-      const nextInterval = isClear ? INTERVAL_CLEAR : INTERVAL_OBSTACLE;
-      setCurrentInterval(nextInterval);
-
     } catch (err) {
       console.error('Vision error:', err);
     } finally {
@@ -94,13 +91,13 @@ export default function BlindAssist({ navState, onStepAdvance }) {
     }
   }, [speak]);
 
-  // ── Restart interval whenever interval duration changes ──
+  // ── Start/stop interval when active ─────────────────────
   useEffect(() => {
     if (!isActive) return;
     clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(captureAndAnalyze, currentInterval);
+    intervalRef.current = setInterval(captureAndAnalyze, SCAN_INTERVAL);
     return () => clearInterval(intervalRef.current);
-  }, [captureAndAnalyze, isActive, currentInterval]);
+  }, [captureAndAnalyze, isActive]);
 
   // ── GPS-based step auto-advance ──────────────────────────
   useEffect(() => {
@@ -112,10 +109,10 @@ export default function BlindAssist({ navState, onStepAdvance }) {
         const steps   = navState.steps;
         const idx     = navState.currentStep;
 
-        if (idx >= steps.length - 1) return; // already at last step
+        if (idx >= steps.length - 1) return;
 
         const step = steps[idx];
-        if (!step?.endLocation) return; // no end location data
+        if (!step?.endLocation) return;
 
         const dist = haversineMetres(userPos, step.endLocation);
         if (dist < STEP_ADVANCE_RADIUS) {
@@ -156,7 +153,7 @@ export default function BlindAssist({ navState, onStepAdvance }) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
-      lastClearRef.current = false;
+      clearCountRef.current = 0;
       setIsActive(true);
       speak('Blind assist activated.');
     } catch (err) {
@@ -185,7 +182,6 @@ export default function BlindAssist({ navState, onStepAdvance }) {
     };
   }, []);
 
-  // ── Severity colours ─────────────────────────────────────
   const severityColor = {
     none:   'var(--green)',
     low:    '#86efac',
@@ -199,7 +195,7 @@ export default function BlindAssist({ navState, onStepAdvance }) {
   return (
     <div className={styles.container}>
 
-      {/* ── Navigation status bar ── */}
+      {/* Navigation status bar */}
       {navState && (
         <div className={styles.navBar}>
           <div className={styles.navDest}>
@@ -208,14 +204,14 @@ export default function BlindAssist({ navState, onStepAdvance }) {
           </div>
           {navState.summary && (
             <div className={styles.navSummary}>
-              <span>📏 {navState.summary.distance}</span>
-              <span>⏱ {navState.summary.duration}</span>
+              <span>{navState.summary.distance}</span>
+              <span>{navState.summary.duration}</span>
             </div>
           )}
         </div>
       )}
 
-      {/* ── Current step ── */}
+      {/* Current step */}
       {currentNavStep && (
         <div className={styles.currentStep}>
           <span className={styles.currentStepIcon} aria-hidden="true">
@@ -229,11 +225,13 @@ export default function BlindAssist({ navState, onStepAdvance }) {
             className={styles.speakStepBtn}
             onClick={() => speak(currentNavStep.instruction)}
             aria-label="Read step aloud"
-          >🔊</button>
+          >
+            Read
+          </button>
         </div>
       )}
 
-      {/* ── Step list ── */}
+      {/* Step list */}
       {navState?.steps?.length > 0 && (
         <div className={styles.stepList}>
           {navState.steps.map((s, i) => (
@@ -247,50 +245,50 @@ export default function BlindAssist({ navState, onStepAdvance }) {
             </div>
           ))}
           <div className={styles.stepRow}>
-            <span className={styles.stepRowIcon}>🏁</span>
+            <span className={styles.stepRowIcon}>[ ]</span>
             <span className={styles.stepRowText}>Arrive at {navState.destinationName}</span>
           </div>
         </div>
       )}
 
-      {/* ── Camera controls ── */}
+      {/* Camera controls */}
       <div className={styles.controls}>
         <button
           className={`${styles.toggleBtn} ${isActive ? styles.stopBtn : styles.startBtn}`}
           onClick={isActive ? stopCamera : startCamera}
           aria-label={isActive ? 'Stop obstacle detection' : 'Start obstacle detection'}
         >
-          {isActive ? '⏹ Stop Camera' : '📷 Start Camera'}
+          {isActive ? 'Stop Camera' : 'Start Camera'}
         </button>
         <button
           className={`${styles.speechBtn} ${speechEnabled ? styles.speechOn : styles.speechOff}`}
           onClick={() => setSpeechEnabled(!speechEnabled)}
           aria-pressed={speechEnabled}
+          aria-label={speechEnabled ? 'Mute speech' : 'Unmute speech'}
         >
-          {speechEnabled ? '🔊' : '🔇'}
+          {speechEnabled ? 'Sound On' : 'Sound Off'}
         </button>
       </div>
 
       {/* Scan rate indicator */}
       {isActive && (
         <div className={styles.scanRate}>
-          {isClearResult
-            ? `🟢 Path clear — scanning every ${INTERVAL_CLEAR / 1000}s`
-            : `🔴 Obstacle — scanning every ${INTERVAL_OBSTACLE / 1000}s`}
+          Scanning every {SCAN_INTERVAL / 1000}s
+          {isClearResult ? ' — path clear' : ' — obstacle detected'}
         </div>
       )}
 
-      {error && <div className={styles.error} role="alert">⚠️ {error}</div>}
+      {error && <div className={styles.error} role="alert">{error}</div>}
 
-      {/* ── Camera feed ── */}
+      {/* Camera feed */}
       <div className={styles.cameraWrapper}>
         <video ref={videoRef} className={styles.video} playsInline muted aria-label="Camera feed" />
         <canvas ref={canvasRef} className={styles.canvas} aria-hidden="true" />
-        {!isActive && <div className={styles.cameraPlaceholder}>📷 Camera inactive</div>}
-        {scanning && <div className={styles.scanningBadge} aria-live="polite">🔍 Scanning...</div>}
+        {!isActive && <div className={styles.cameraPlaceholder}>Camera inactive</div>}
+        {scanning && <div className={styles.scanningBadge} aria-live="polite">Scanning...</div>}
       </div>
 
-      {/* ── Obstacle result ── */}
+      {/* Obstacle result */}
       {result && (
         <div
           className={styles.result}
@@ -305,7 +303,7 @@ export default function BlindAssist({ navState, onStepAdvance }) {
               aria-hidden="true"
             />
             <span className={styles.severityLabel}>
-              {result.hasObstacle ? '⚠️ Obstacle Detected' : '✅ Path Clear'}
+              {result.hasObstacle ? 'Obstacle Detected' : 'Path Clear'}
             </span>
           </div>
           <p className={styles.action}>{result.action}</p>
