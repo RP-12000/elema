@@ -33,6 +33,8 @@
   max-height: calc(100vh - 80px);
   overflow-y: auto;
   overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   background: var(--bg-2);
   border: 1px solid var(--border-strong);
   border-radius: 14px;
@@ -42,7 +44,6 @@
   flex-direction: column;
   gap: 4px;
   animation: fadeIn 0.15s ease;
-  /* custom scrollbar */
   scrollbar-width: thin;
   scrollbar-color: var(--bg-4) transparent;
 }

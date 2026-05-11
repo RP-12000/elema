@@ -146,7 +146,13 @@ export default function AccessibilityPanel({
 
         {/* Dropdown */}
         {open && (
-          <div className={styles.panel} role="dialog" aria-label="Accessibility settings">
+          <div
+            className={styles.panel}
+            role="dialog"
+            aria-label="Accessibility settings"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             <h3 className={styles.panelTitle}>Accessibility</h3>
 
             {/* ── Blind Assist ── */}
